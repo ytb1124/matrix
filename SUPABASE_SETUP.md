@@ -10,7 +10,9 @@ Supabase Dashboard → **Project Settings → API**에서 Project URL과 Publish
 2. 먼저 `supabase/schema.sql` 전체를 붙여 넣고 **Run**을 누릅니다.
 3. Authentication 사용자 생성 후 `supabase/finalize_setup.sql`을 실행합니다.
 
-이미 일부 테이블이 존재한다면 전체 스키마를 반복 실행하지 말고 변경분만 검토해서 실행합니다.
+`schema.sql`은 enum, 테이블, 인덱스, RLS 정책, `venue-images` bucket을 재실행해도 충돌하지 않도록 구성되어 있습니다. 일부 객체만 만들어진 상태이거나 이전 실행이 중간에 실패한 경우에도 **파일 전체를 다시 실행**하는 것이 권장됩니다. 기존 테이블과 데이터는 삭제하지 않으며, 정책만 현재 정의로 안전하게 교체합니다.
+
+단, 현재 DB에 같은 이름의 컬럼이 다른 자료형으로 수동 생성되어 있다면 자동으로 강제 변환하지 않습니다. 이 경우 테이블을 삭제하지 말고 오류 메시지와 해당 컬럼 정의를 먼저 확인합니다.
 
 ## 3. 관리자 계정 등록
 

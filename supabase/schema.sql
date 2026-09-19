@@ -1,10 +1,32 @@
 create extension if not exists pgcrypto;
 
-create type public.venue_verification_status as enum ('unverified', 'needs_review', 'verified');
-create type public.source_kind as enum ('official', 'mule', 'phone', 'social', 'other');
-create type public.rate_day_type as enum ('weekday', 'friday', 'saturday', 'sunday', 'holiday', 'hourly', 'other');
+-- PostgreSQL does not support CREATE TYPE IF NOT EXISTS. Catch only the
+-- duplicate-object case so a genuine enum definition error is still reported.
+do $$
+begin
+  create type public.venue_verification_status as enum ('unverified', 'needs_review', 'verified');
+exception
+  when duplicate_object then null;
+end
+$$;
 
-create table public.venues (
+do $$
+begin
+  create type public.source_kind as enum ('official', 'mule', 'phone', 'social', 'other');
+exception
+  when duplicate_object then null;
+end
+$$;
+
+do $$
+begin
+  create type public.rate_day_type as enum ('weekday', 'friday', 'saturday', 'sunday', 'holiday', 'hourly', 'other');
+exception
+  when duplicate_object then null;
+end
+$$;
+
+create table if not exists public.venues (
   id uuid primary key default gen_random_uuid(),
   slug text not null unique,
   name text not null unique,
@@ -39,7 +61,7 @@ create table public.venues (
   updated_at timestamptz not null default now()
 );
 
-create table public.rental_rates (
+create table if not exists public.rental_rates (
   id uuid primary key default gen_random_uuid(),
   venue_id uuid not null references public.venues(id) on delete cascade,
   day_type public.rate_day_type not null,
@@ -53,7 +75,7 @@ create table public.rental_rates (
   unique (venue_id, day_type, audience_type, valid_months, price_krw)
 );
 
-create table public.venue_staff (
+create table if not exists public.venue_staff (
   venue_id uuid primary key references public.venues(id) on delete cascade,
   sound_engineer_included boolean,
   monitor_engineer_included boolean,
@@ -65,7 +87,7 @@ create table public.venue_staff (
   notes text
 );
 
-create table public.audio_systems (
+create table if not exists public.audio_systems (
   venue_id uuid primary key references public.venues(id) on delete cascade,
   foh_console text,
   main_pa text,
@@ -78,7 +100,7 @@ create table public.audio_systems (
   audio_notes text
 );
 
-create table public.equipment_catalog (
+create table if not exists public.equipment_catalog (
   id uuid primary key default gen_random_uuid(),
   category text not null,
   manufacturer text,
@@ -87,7 +109,7 @@ create table public.equipment_catalog (
   unique(category, normalized_name)
 );
 
-create table public.venue_equipment (
+create table if not exists public.venue_equipment (
   venue_id uuid not null references public.venues(id) on delete cascade,
   equipment_id uuid references public.equipment_catalog(id) on delete set null,
   category text not null,
@@ -98,7 +120,7 @@ create table public.venue_equipment (
   primary key (venue_id, category, raw_description)
 );
 
-create table public.venue_facilities (
+create table if not exists public.venue_facilities (
   venue_id uuid primary key references public.venues(id) on delete cascade,
   waiting_room boolean,
   parking boolean,
@@ -111,7 +133,7 @@ create table public.venue_facilities (
   notes text
 );
 
-create table public.sources (
+create table if not exists public.sources (
   id uuid primary key default gen_random_uuid(),
   venue_id uuid not null references public.venues(id) on delete cascade,
   kind public.source_kind not null,
@@ -122,7 +144,7 @@ create table public.sources (
   notes text
 );
 
-create table public.verification_records (
+create table if not exists public.verification_records (
   id uuid primary key default gen_random_uuid(),
   venue_id uuid not null references public.venues(id) on delete cascade,
   source_id uuid references public.sources(id) on delete set null,
@@ -133,7 +155,7 @@ create table public.verification_records (
   notes text
 );
 
-create table public.venue_images (
+create table if not exists public.venue_images (
   id uuid primary key default gen_random_uuid(),
   venue_id uuid not null references public.venues(id) on delete cascade,
   storage_path text not null unique,
@@ -143,10 +165,28 @@ create table public.venue_images (
   created_at timestamptz not null default now()
 );
 
-create table public.admin_users (
+create table if not exists public.admin_users (
   user_id uuid primary key references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
 );
+
+-- CREATE TABLE IF NOT EXISTS does not add columns to an older table. These
+-- additions keep upgrades from earlier MATRIX schemas non-destructive. They
+-- intentionally do not rewrite or delete existing rows.
+alter table public.venues add column if not exists neighborhood text;
+alter table public.venues add column if not exists area_label text;
+alter table public.venues add column if not exists stage_size text;
+alter table public.venues add column if not exists rental_hours text;
+alter table public.venues add column if not exists tax_included boolean;
+alter table public.venues add column if not exists price_notes text;
+alter table public.venues add column if not exists location_verified boolean not null default false;
+alter table public.venues add column if not exists geocoded_at timestamptz;
+alter table public.venues add column if not exists geocoded_address text;
+alter table public.venues add column if not exists address_hash text;
+
+alter table public.venue_staff add column if not exists monitor_engineer_included boolean;
+alter table public.venue_facilities add column if not exists elevator boolean;
+alter table public.venue_facilities add column if not exists easy_load_in boolean;
 
 create or replace function public.is_admin()
 returns boolean
@@ -156,51 +196,78 @@ security definer
 set search_path = public
 as $$ select exists (select 1 from public.admin_users where user_id = auth.uid()) $$;
 
-alter table public.venues enable row level security;
-alter table public.rental_rates enable row level security;
-alter table public.venue_staff enable row level security;
-alter table public.audio_systems enable row level security;
-alter table public.equipment_catalog enable row level security;
-alter table public.venue_equipment enable row level security;
-alter table public.venue_facilities enable row level security;
-alter table public.sources enable row level security;
-alter table public.verification_records enable row level security;
-alter table public.venue_images enable row level security;
-alter table public.admin_users enable row level security;
+alter table if exists public.venues enable row level security;
+alter table if exists public.rental_rates enable row level security;
+alter table if exists public.venue_staff enable row level security;
+alter table if exists public.audio_systems enable row level security;
+alter table if exists public.equipment_catalog enable row level security;
+alter table if exists public.venue_equipment enable row level security;
+alter table if exists public.venue_facilities enable row level security;
+alter table if exists public.sources enable row level security;
+alter table if exists public.verification_records enable row level security;
+alter table if exists public.venue_images enable row level security;
+alter table if exists public.admin_users enable row level security;
 
+-- Policies have no CREATE POLICY IF NOT EXISTS form. Replacing them is safe:
+-- policy definitions change, but table rows are untouched.
+drop policy if exists "Public read venues" on public.venues;
 create policy "Public read venues" on public.venues for select using (true);
+drop policy if exists "Public read rental rates" on public.rental_rates;
 create policy "Public read rental rates" on public.rental_rates for select using (true);
+drop policy if exists "Public read venue staff" on public.venue_staff;
 create policy "Public read venue staff" on public.venue_staff for select using (true);
+drop policy if exists "Public read audio systems" on public.audio_systems;
 create policy "Public read audio systems" on public.audio_systems for select using (true);
+drop policy if exists "Public read equipment catalog" on public.equipment_catalog;
 create policy "Public read equipment catalog" on public.equipment_catalog for select using (true);
+drop policy if exists "Public read venue equipment" on public.venue_equipment;
 create policy "Public read venue equipment" on public.venue_equipment for select using (true);
+drop policy if exists "Public read venue facilities" on public.venue_facilities;
 create policy "Public read venue facilities" on public.venue_facilities for select using (true);
+drop policy if exists "Public read sources" on public.sources;
 create policy "Public read sources" on public.sources for select using (true);
+drop policy if exists "Public read verification records" on public.verification_records;
 create policy "Public read verification records" on public.verification_records for select using (true);
+drop policy if exists "Public read venue images" on public.venue_images;
 create policy "Public read venue images" on public.venue_images for select using (true);
+drop policy if exists "Admin reads own role" on public.admin_users;
 create policy "Admin reads own role" on public.admin_users for select using (user_id = auth.uid());
 
+drop policy if exists "Admins manage venues" on public.venues;
 create policy "Admins manage venues" on public.venues for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage rental rates" on public.rental_rates;
 create policy "Admins manage rental rates" on public.rental_rates for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage venue staff" on public.venue_staff;
 create policy "Admins manage venue staff" on public.venue_staff for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage audio systems" on public.audio_systems;
 create policy "Admins manage audio systems" on public.audio_systems for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage equipment catalog" on public.equipment_catalog;
 create policy "Admins manage equipment catalog" on public.equipment_catalog for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage venue equipment" on public.venue_equipment;
 create policy "Admins manage venue equipment" on public.venue_equipment for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage venue facilities" on public.venue_facilities;
 create policy "Admins manage venue facilities" on public.venue_facilities for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage sources" on public.sources;
 create policy "Admins manage sources" on public.sources for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage verification records" on public.verification_records;
 create policy "Admins manage verification records" on public.verification_records for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins manage venue images" on public.venue_images;
 create policy "Admins manage venue images" on public.venue_images for all using (public.is_admin()) with check (public.is_admin());
 
 insert into storage.buckets (id, name, public) values ('venue-images', 'venue-images', true)
-on conflict (id) do update set public = excluded.public;
+on conflict (id) do update set name = excluded.name, public = excluded.public;
+drop policy if exists "Public read venue image objects" on storage.objects;
 create policy "Public read venue image objects" on storage.objects for select using (bucket_id = 'venue-images');
+drop policy if exists "Admins upload venue image objects" on storage.objects;
 create policy "Admins upload venue image objects" on storage.objects for insert with check (bucket_id = 'venue-images' and public.is_admin());
+drop policy if exists "Admins update venue image objects" on storage.objects;
 create policy "Admins update venue image objects" on storage.objects for update using (bucket_id = 'venue-images' and public.is_admin()) with check (bucket_id = 'venue-images' and public.is_admin());
+drop policy if exists "Admins delete venue image objects" on storage.objects;
 create policy "Admins delete venue image objects" on storage.objects for delete using (bucket_id = 'venue-images' and public.is_admin());
 
-create index venues_search_idx on public.venues using gin (to_tsvector('simple', coalesce(name,'') || ' ' || coalesce(area_label,'') || ' ' || coalesce(address_display,'') || ' ' || coalesce(nearest_station,'')));
-create index venues_geo_idx on public.venues (latitude, longitude) where latitude is not null and longitude is not null;
-create index rental_rates_filter_idx on public.rental_rates (day_type, price_krw);
-create index venue_equipment_filter_idx on public.venue_equipment (category, venue_id);
-create index verification_latest_idx on public.verification_records (venue_id, checked_at desc);
-create index venue_images_order_idx on public.venue_images (venue_id, sort_order);
+create index if not exists venues_search_idx on public.venues using gin (to_tsvector('simple', coalesce(name,'') || ' ' || coalesce(area_label,'') || ' ' || coalesce(address_display,'') || ' ' || coalesce(nearest_station,'')));
+create index if not exists venues_geo_idx on public.venues (latitude, longitude) where latitude is not null and longitude is not null;
+create index if not exists rental_rates_filter_idx on public.rental_rates (day_type, price_krw);
+create index if not exists venue_equipment_filter_idx on public.venue_equipment (category, venue_id);
+create index if not exists verification_latest_idx on public.verification_records (venue_id, checked_at desc);
+create index if not exists venue_images_order_idx on public.venue_images (venue_id, sort_order);
