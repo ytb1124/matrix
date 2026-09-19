@@ -1,5 +1,18 @@
 # Supabase 설정
 
+## 현재 진행 상태
+
+- [x] `schema.sql` 전체 실행
+- [x] Authentication 관리자 사용자 생성
+- [x] `finalize_setup.sql` 실행 및 관리자 UID 등록
+- [x] `venue-images` bucket과 RLS 확인
+- [x] 검토된 MATRIX 공연장 데이터 적재: 공연장 8개, 대관료 26개, 인력·음향·시설 각 8개, 장비 11개, 출처 16개
+- [x] 8개 공연장 주소 geocoding 및 검토 대기 좌표 저장
+- [ ] `/admin`에서 8개 위치를 주소와 대조한 뒤 `지도 위치 검증`을 `포함 / 가능`으로 저장
+- [ ] 대표 이미지 업로드 및 관리자 기능 최종 점검
+
+Supabase Secret Key는 GitHub나 Sites/Vercel 런타임에 배포하지 않고, Git에서 제외된 로컬 `.env.local`의 관리 스크립트에만 사용합니다.
+
 ## 1. 프로젝트 값 확인
 
 Supabase Dashboard → **Project Settings → API**에서 Project URL과 Publishable key를 확인합니다. 브라우저에는 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`만 사용합니다. Secret key와 과거 Service Role key는 브라우저나 Vercel의 `NEXT_PUBLIC_` 변수에 넣지 않습니다.
@@ -30,4 +43,18 @@ Dashboard → **Database → Tables**에서 각 테이블의 RLS가 Enabled인�
 
 Excel 변환은 `python scripts/import_venues.py 원본.xlsx data/import`로 수행합니다. 결과를 검토한 뒤 UUID 관계를 연결해 Supabase에 넣습니다. 가격·수용 인원·Boolean을 표시 문자열이 아닌 `integer`/`boolean` 컬럼에 넣어야 필터가 정확히 동작합니다.
 
+현재 프로젝트의 검토된 조사 데이터는 아래 명령으로 재실행해도 기존 공연장이나 관리자 수정 내용을 덮어쓰지 않고 누락된 관계 데이터만 추가합니다.
+
+```bash
+node --env-file=.env.local --experimental-strip-types scripts/seed-supabase.ts
+```
+
 관리자 저장은 Supabase에 즉시 반영되며 사이트 재배포가 필요 없습니다.
+
+## 7. 좌표 검증과 최종 확인
+
+1. MATRIX `/admin`에 관리자 계정으로 로그인합니다.
+2. 공연장을 하나씩 선택해 주소와 실제 지도 위치를 대조합니다.
+3. 위치가 맞는 공연장만 `지도 위치 검증`을 `포함 / 가능`으로 바꾸고 저장합니다.
+4. 위치가 틀리면 검증하지 말고 주소를 수정한 뒤 geocoding 스크립트를 다시 실행합니다.
+5. 대표 이미지를 업로드하고 로그아웃 상태에서 수정·삭제가 차단되는지 확인합니다.

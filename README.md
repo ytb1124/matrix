@@ -30,7 +30,7 @@ values ('관리자-auth-users-uuid');
 ```
 
 4. `schema.sql`이 생성한 `venue-images` public bucket과 Storage 정책을 확인합니다.
-5. Excel 변환 결과를 검토한 뒤 `venues`, `rental_rates` 및 관련 표에 적재합니다.
+5. Excel 변환 결과를 검토한 뒤 `scripts/seed-supabase.ts`로 `venues`, `rental_rates` 및 관련 표에 적재합니다.
 
 RLS 정책상 일반 사용자는 공개 데이터를 읽을 수만 있고, `admin_users`에 등록된 로그인 사용자만 공연장·가격·장비·이미지를 수정할 수 있습니다. `/admin`에서 로그인 후 저장한 내용은 다음 페이지 요청부터 즉시 반영되며 재배포가 필요 없습니다.
 
@@ -94,7 +94,8 @@ components/                탐색, Naver 지도, 관리자, 비용 계산 UI
 lib/venue-data.ts          Supabase 읽기와 Excel fallback
 lib/venues.ts              환경 설정 전 fallback 데이터
 scripts/import_venues.py   Excel → 정규화 JSON
-scripts/geocode-venues.ts  Naver 주소 geocoding
+scripts/seed-supabase.ts   검토된 조사 데이터 → Supabase 안전 적재
+scripts/geocode-supabase.ts Naver 주소 geocoding → Supabase 저장
 supabase/schema.sql        PostgreSQL, RLS, Storage 정책
 DESIGN_SYSTEM.md           MATRIX UI 기준
 ```

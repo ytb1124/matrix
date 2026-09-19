@@ -16,8 +16,8 @@ Supabase에 웹 코드를 업로드하는 구조가 아닙니다. 웹 코드는 
 2. Authentication 관리자 사용자 생성
 3. `supabase/finalize_setup.sql` 실행
 4. `venue-images` bucket과 RLS 확인
-5. 검토한 Excel 데이터 import
-6. 주소 geocoding 실행 및 위치 검증
+5. 검토한 Excel 데이터 import (`scripts/seed-supabase.ts`)
+6. 주소 geocoding 실행 후 `/admin`에서 위치 검증
 7. Project URL과 Publishable key 확인
 
 세부 절차는 `SUPABASE_SETUP.md`를 따릅니다.
