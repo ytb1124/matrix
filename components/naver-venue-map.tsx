@@ -26,6 +26,7 @@ export function NaverVenueMap({ venues, clientId }: { venues: Venue[]; clientId:
   const [selected, setSelected] = useState<Venue | null>(null);
   const selectedPrice = selected ? selected.prices.weekendMin ?? selected.prices.weekdayMin : null;
   const mapped = useMemo(() => venues.filter((venue) => venue.locationVerified && venue.latitude !== null && venue.longitude !== null), [venues]);
+  const visibleSelected = selected && mapped.some((venue) => venue.slug === selected.slug) ? selected : null;
 
   useEffect(() => {
     if (!clientId) return;
@@ -60,16 +61,16 @@ export function NaverVenueMap({ venues, clientId }: { venues: Venue[]; clientId:
     return () => { markers.current.forEach((marker) => marker.setMap(null)); markers.current = []; };
   }, [ready, mapped]);
 
-  if (!clientId) return <MapNotice title="Naver Maps 설정 필요" body="지도 API 키가 설정되면 검증된 좌표의 공연장만 표시됩니다." />;
+  if (!clientId) return <MapNotice title={process.env.NODE_ENV === "development" ? "Naver Maps Client ID가 필요합니다" : "지도를 준비 중입니다"} body={process.env.NODE_ENV === "development" ? "NEXT_PUBLIC_NAVER_MAP_CLIENT_ID를 설정해 주세요." : "현재 지도 정보를 불러올 수 없습니다. 목록에서 공연장을 확인해 주세요."} />;
   if (loadError) return <MapNotice title="지도를 불러오지 못했습니다" body="Naver Maps Client ID와 Web Service URL 등록을 확인해 주세요." />;
 
   return (
     <div className="matrix-map-shell">
       <div ref={mapElement} className="matrix-map" aria-label="공연장 네이버 지도" />
       {ready && mapped.length === 0 && <div className="matrix-map-empty"><MapPin /><strong>표시할 검증 좌표가 없습니다</strong><span>주소 geocoding 검토가 끝난 공연장만 지도에 표시됩니다.</span></div>}
-      {selected && <div className="map-preview">
-        {selected.images?.[0] ? <img src={selected.images[0]} alt="" /> : <div className="map-preview-placeholder">MATRIX</div>}
-        <div><button className="map-preview-close" onClick={() => setSelected(null)} aria-label="미리보기 닫기">×</button><p className="map-preview-area">{selected.area}</p><h3>{selected.name}</h3>{selected.capacity && <p>{selected.capacity.toLocaleString("ko-KR")}명</p>}<p className="map-preview-price">{selectedPrice === null ? "가격 문의" : `${formatWon(selectedPrice)}부터`}</p><a href={`/venues/${selected.slug}`}>상세보기</a></div>
+      {visibleSelected && <div className="map-preview">
+        {visibleSelected.images?.[0] ? <img src={visibleSelected.images[0]} alt="" /> : <div className="map-preview-placeholder">MATRIX</div>}
+        <div><button className="map-preview-close" onClick={() => setSelected(null)} aria-label="미리보기 닫기">×</button><p className="map-preview-area">{visibleSelected.area}</p><h3>{visibleSelected.name}</h3>{visibleSelected.capacity && <p>{visibleSelected.capacity.toLocaleString("ko-KR")}명</p>}<p className="map-preview-price">{selectedPrice === null ? "가격 문의" : `${formatWon(selectedPrice)}부터`}</p><a href={`/venues/${visibleSelected.slug}`}>상세보기</a></div>
       </div>}
     </div>
   );

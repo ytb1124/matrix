@@ -21,6 +21,9 @@ export type Venue = {
     weekend: string | null;
     weekdayMin: number | null;
     weekendMin: number | null;
+    fridayMin?: number | null;
+    saturdayMin?: number | null;
+    sundayMin?: number | null;
     rentalHours: string | null;
     taxIncluded: Ternary;
     notes: string | null;
@@ -92,6 +95,9 @@ export const venues: Venue[] = [
       weekend: "토 130만~150만 원, 일 100만~120만 원 (월별 상이)",
       weekdayMin: 600000,
       weekendMin: 1000000,
+      fridayMin: 900000,
+      saturdayMin: 1300000,
+      sundayMin: 1000000,
       rentalHours: "기본 8시간",
       taxIncluded: false,
       notes: "공연 러닝타임 3시간 초과 시 15만 원/시간. 기본 대관시간 초과 시 10만 원/시간. 심야·이른 시간 및 성수기는 별도 조건.",
@@ -133,7 +139,7 @@ export const venues: Venue[] = [
     sourceUrl: "https://www.mule.co.kr/bbs/info/club?idx=62603581",
     status: "운영 중",
     capacity: null,
-    prices: { weekday: "월–목 25만~30만 원, 금 40만~50만 원 (월별 상이)", weekend: "토 50만~60만 원 (월별 상이)", weekdayMin: 250000, weekendMin: 500000, rentalHours: "기본 5시간", taxIncluded: false, notes: "기본시간 이후 10만 원/시간, 24시 이후 15만 원/시간. 공휴일·성수기 별도 문의." },
+    prices: { weekday: "월–목 25만~30만 원, 금 40만~50만 원 (월별 상이)", weekend: "토 50만~60만 원 (월별 상이)", weekdayMin: 250000, weekendMin: 500000, fridayMin: 400000, saturdayMin: 500000, sundayMin: null, rentalHours: "기본 5시간", taxIncluded: false, notes: "기본시간 이후 10만 원/시간, 24시 이후 15만 원/시간. 공휴일·성수기 별도 문의." },
     staff: { soundEngineer: true, lightingOperator: true, stageStaff: null, includedNotes: "음향 엔지니어", extraFee: "조명감독 15만 원", notes: null },
     audio: { console: "Midas M32R", mainPa: "LD Systems MAUI 11 G2", monitor: null, wiredMic: "유선 마이크 ×4", wirelessMic: "없음", diBox: "없음" },
     backline: { drums: "Ludwig 어쿠스틱 드럼 5기통", guitarAmp: "Vox Night Train NT-15H, Marshall JVM 410H", bassAmp: "Markbass Little Mark 250 Black Line", keyboard: "Kurzweil K2700", notes: "세컨드 건반 Motif ES6 추가 5만 원." },
@@ -154,7 +160,7 @@ export const venues: Venue[] = [
     sourceUrl: "https://www.mule.co.kr/bbs/info/club?idx=69174749",
     status: "운영 중",
     capacity: null,
-    prices: { weekday: "월–목 55만 원, 금 65만 원", weekend: "토 70만 원, 일 65만 원", weekdayMin: 550000, weekendMin: 650000, rentalHours: "기본 4시간", taxIncluded: null, notes: "기본시간 이후 10만 원/시간. 단축 대관 가능." },
+    prices: { weekday: "월–목 55만 원, 금 65만 원", weekend: "토 70만 원, 일 65만 원", weekdayMin: 550000, weekendMin: 650000, fridayMin: 650000, saturdayMin: 700000, sundayMin: 650000, rentalHours: "기본 4시간", taxIncluded: null, notes: "기본시간 이후 10만 원/시간. 단축 대관 가능." },
     staff: { soundEngineer: true, lightingOperator: null, stageStaff: null, includedNotes: "음향 엔지니어", extraFee: null, notes: null },
     audio: { console: "Behringer WING Compact", mainPa: "Turbosound TXD151, FBT X-Sub18", monitor: "HK Pro12MA ×3, JBL ×1", wiredMic: "Shure SM58 ×4, SM57 ×1", wirelessMic: "없음", diBox: "EWI Stereo DI ×2, Mono DI ×2" },
     backline: { drums: null, guitarAmp: null, bassAmp: null, keyboard: null, notes: "마이크 스탠드 보유" },
@@ -175,7 +181,7 @@ export const venues: Venue[] = [
     sourceUrl: "https://www.mule.co.kr/bbs/info/club?idx=63966471",
     status: "운영 중",
     capacity: null,
-    prices: { weekday: "월–목 60만 원, 금 70만 원", weekend: "토 120만~130만 원, 일 70만~80만 원 (월별 상이)", weekdayMin: 600000, weekendMin: 700000, rentalHours: "기본 8시간", taxIncluded: null, notes: "공연 러닝타임 3시간 초과 시 15만 원/시간. 기본 대관시간 초과 시 10만 원/시간." },
+    prices: { weekday: "월–목 60만 원, 금 70만 원", weekend: "토 120만~130만 원, 일 70만~80만 원 (월별 상이)", weekdayMin: 600000, weekendMin: 700000, fridayMin: 700000, saturdayMin: 1200000, sundayMin: 700000, rentalHours: "기본 8시간", taxIncluded: null, notes: "공연 러닝타임 3시간 초과 시 15만 원/시간. 기본 대관시간 초과 시 10만 원/시간." },
     staff: { soundEngineer: true, lightingOperator: null, stageStaff: null, includedNotes: null, extraFee: null, notes: null },
     audio: { console: null, mainPa: null, monitor: null, wiredMic: null, wirelessMic: null, diBox: null },
     backline: { drums: null, guitarAmp: null, bassAmp: null, keyboard: null, notes: null },
@@ -196,7 +202,7 @@ export const venues: Venue[] = [
     sourceUrl: "https://www.mule.co.kr/bbs/info/club?idx=69406785",
     status: "운영 중",
     capacity: null,
-    prices: { weekday: "60만 원", weekend: null, weekdayMin: 600000, weekendMin: null, rentalHours: "기본 5시간", taxIncluded: false, notes: "대관시간 초과 시 12만 원/시간." },
+    prices: { weekday: "60만 원", weekend: null, weekdayMin: 600000, weekendMin: null, fridayMin: null, saturdayMin: null, sundayMin: null, rentalHours: "기본 5시간", taxIncluded: false, notes: "대관시간 초과 시 12만 원/시간." },
     staff: { soundEngineer: true, lightingOperator: true, stageStaff: null, includedNotes: "음향 엔지니어, 조명감독", extraFee: null, notes: "외부 엔지니어 동반 불가" },
     audio: { console: null, mainPa: null, monitor: null, wiredMic: null, wirelessMic: null, diBox: null },
     backline: { drums: null, guitarAmp: null, bassAmp: null, keyboard: null, notes: null },
@@ -217,7 +223,7 @@ export const venues: Venue[] = [
     sourceUrl: "https://www.mule.co.kr/bbs/info/club?idx=3926878",
     status: "운영 중",
     capacity: null,
-    prices: { weekday: "월–목 43만 원, 금 60만 원", weekend: "토 75만 원, 일 60만 원", weekdayMin: 430000, weekendMin: 600000, rentalHours: "기본 6시간", taxIncluded: false, notes: null },
+    prices: { weekday: "월–목 43만 원, 금 60만 원", weekend: "토 75만 원, 일 60만 원", weekdayMin: 430000, weekendMin: 600000, fridayMin: 600000, saturdayMin: 750000, sundayMin: 600000, rentalHours: "기본 6시간", taxIncluded: false, notes: null },
     staff: { soundEngineer: null, lightingOperator: null, stageStaff: null, includedNotes: null, extraFee: null, notes: null },
     audio: { console: null, mainPa: null, monitor: null, wiredMic: null, wirelessMic: null, diBox: null },
     backline: { drums: null, guitarAmp: null, bassAmp: null, keyboard: null, notes: null },
@@ -238,7 +244,7 @@ export const venues: Venue[] = [
     sourceUrl: "https://www.mule.co.kr/bbs/info/club?idx=68352615",
     status: "운영 중",
     capacity: null,
-    prices: { weekday: "월–목 80만 원(대학생) / 90만 원(일반), 금 100만 원(대학생) / 110만 원(일반)", weekend: "토 120만 원(대학생) / 140만 원(일반), 일 100만 원(대학생) / 110만 원(일반)", weekdayMin: 800000, weekendMin: 1000000, rentalHours: "기본 7시간", taxIncluded: null, notes: "대관시간 초과 시 30분당 10만 원." },
+    prices: { weekday: "월–목 80만 원(대학생) / 90만 원(일반), 금 100만 원(대학생) / 110만 원(일반)", weekend: "토 120만 원(대학생) / 140만 원(일반), 일 100만 원(대학생) / 110만 원(일반)", weekdayMin: 800000, weekendMin: 1000000, fridayMin: 1000000, saturdayMin: 1200000, sundayMin: 1000000, rentalHours: "기본 7시간", taxIncluded: null, notes: "대관시간 초과 시 30분당 10만 원." },
     staff: { soundEngineer: true, lightingOperator: null, stageStaff: null, includedNotes: null, extraFee: null, notes: null },
     audio: { console: null, mainPa: null, monitor: null, wiredMic: null, wirelessMic: null, diBox: null },
     backline: { drums: null, guitarAmp: null, bassAmp: null, keyboard: null, notes: null },
@@ -259,7 +265,7 @@ export const venues: Venue[] = [
     sourceUrl: "https://www.mule.co.kr/bbs/info/club?idx=66353496",
     status: "운영 중",
     capacity: null,
-    prices: { weekday: "월–목 시간당 10만 원", weekend: "80만 원", weekdayMin: 100000, weekendMin: 800000, rentalHours: null, taxIncluded: false, notes: null },
+    prices: { weekday: "월–목 시간당 10만 원", weekend: "80만 원", weekdayMin: 100000, weekendMin: 800000, fridayMin: null, saturdayMin: null, sundayMin: null, rentalHours: null, taxIncluded: false, notes: null },
     staff: { soundEngineer: true, lightingOperator: true, stageStaff: null, includedNotes: "음향·조명·영상 엔지니어", extraFee: null, notes: null },
     audio: { console: null, mainPa: null, monitor: null, wiredMic: null, wirelessMic: null, diBox: null },
     backline: { drums: null, guitarAmp: null, bassAmp: null, keyboard: null, notes: null },

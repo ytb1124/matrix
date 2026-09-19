@@ -49,6 +49,9 @@ function mapRow(row: Row): Venue {
     prices: {
       weekday: rateText(weekdayRates), weekend: rateText(weekendRates),
       weekdayMin: minRate(weekdayRates), weekendMin: minRate(weekendRates),
+      fridayMin: minRate(rates.filter((rate) => rate.day_type === "friday")),
+      saturdayMin: minRate(rates.filter((rate) => rate.day_type === "saturday")),
+      sundayMin: minRate(rates.filter((rate) => rate.day_type === "sunday")),
       rentalHours: row.rental_hours ? String(row.rental_hours) : null,
       taxIncluded: bool(row.tax_included), notes: row.price_notes ? String(row.price_notes) : null,
     },
@@ -89,15 +92,22 @@ function mapRow(row: Row): Venue {
 }
 
 export async function getVenues(): Promise<Venue[]> {
-  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return fallbackVenues;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) {
+    if (process.env.NODE_ENV !== "production") console.warn("MATRIX: NEXT_PUBLIC_SUPABASE_URL 또는 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY가 없어 로컬 조사 데이터로 표시합니다.");
+    return fallbackVenues;
+  }
   try {
     const supabase = createClient(url, key, { auth: { persistSession: false } });
     const { data, error } = await supabase.from("venues").select("*, venue_staff(*), audio_systems(*), venue_facilities(*), rental_rates(*), venue_equipment(*), venue_images(*), sources(*)").order("name");
-    if (error || !data?.length) return fallbackVenues;
+    if (error || !data?.length) {
+      if (process.env.NODE_ENV !== "production") console.error("MATRIX: Supabase 공연장 조회 실패", error?.message ?? "데이터 없음");
+      return fallbackVenues;
+    }
     return data.map((row) => mapRow(row as Row));
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") console.error("MATRIX: Supabase 연결 실패", error);
     return fallbackVenues;
   }
 }
@@ -108,8 +118,7 @@ export async function getVenueBySlug(slug: string): Promise<Venue | undefined> {
 
 export function getPublicSupabaseConfig() {
   return {
-    url: process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    anonKey: process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
   };
 }
-

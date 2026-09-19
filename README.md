@@ -4,7 +4,8 @@
 
 ## 주요 기능
 
-- 공연장 검색, 생활권·가격·엔지니어·드럼·콘솔 필터와 정렬
+- 공연장명, 생활권, 요일별 가격, 수용 인원, 엔지니어, 장비, 주차 필터와 정렬
+- URL Search Params 기반 필터 공유·새로고침 유지
 - 목록 / Naver 지도 전환, 데스크톱 split view, 모바일 전체 지도
 - 공연장 상세 URL, 2~4곳 비교, 확인 가능한 최소 대관료 계산
 - Supabase Auth 관리자 로그인, 공연장 CRUD, Technical 정보와 장비 편집
@@ -21,7 +22,7 @@ Excel에는 8개 공연장이 있으며 가격은 요일·월·대상 조건이 
 
 1. Supabase 프로젝트의 SQL Editor에서 [supabase/schema.sql](supabase/schema.sql)을 실행합니다.
 2. Authentication에서 관리자 계정을 생성합니다.
-3. 생성된 사용자의 UUID를 `admin_users`에 추가합니다.
+3. 생성된 사용자의 UUID를 [supabase/finalize_setup.sql](supabase/finalize_setup.sql)로 `admin_users`에 추가합니다.
 
 ```sql
 insert into public.admin_users (user_id)
@@ -51,22 +52,24 @@ npx tsx scripts/geocode-venues.ts data/import/venues.json data/import/venues.geo
 
 ## 환경 변수
 
-로컬은 `.env.local`, 배포 환경은 Sites 환경 변수에 설정합니다. Secret과 Service Role 키를 저장소에 커밋하지 않습니다.
+로컬은 `.env.local`, 배포 환경은 Sites 또는 Vercel 환경 변수에 설정합니다. Secret key를 저장소에 커밋하지 않습니다.
 
 ```text
-# 사이트가 공개 데이터를 읽고 관리자 브라우저가 Supabase Auth를 사용할 때 필요
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
+# 브라우저 공개 가능. RLS가 쓰기 권한을 보호함
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 # Naver Maps JavaScript 지도. 공개 Client ID지만 허용 도메인을 제한해야 함
-NAVER_MAP_CLIENT_ID=
+NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=
 
 # 로컬 geocoding 스크립트 전용. 브라우저에 노출 금지
 NAVER_MAPS_GEOCODING_CLIENT_ID=
 NAVER_MAPS_GEOCODING_CLIENT_SECRET=
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY`는 초기 import 같은 서버 관리 작업에서만 선택적으로 사용하며 사이트 런타임과 브라우저에는 제공하지 않습니다.
+`SUPABASE_SECRET_KEY`는 초기 import와 geocoding 같은 로컬 관리 작업에서만 선택적으로 사용하며 사이트 런타임과 브라우저에는 제공하지 않습니다.
+
+초보자용 전체 절차는 [SUPABASE_SETUP.md](SUPABASE_SETUP.md), [NAVER_MAP_SETUP.md](NAVER_MAP_SETUP.md), [DEPLOYMENT.md](DEPLOYMENT.md)를 따릅니다.
 
 ## Excel 이관
 
@@ -95,4 +98,3 @@ scripts/geocode-venues.ts  Naver 주소 geocoding
 supabase/schema.sql        PostgreSQL, RLS, Storage 정책
 DESIGN_SYSTEM.md           MATRIX UI 기준
 ```
-
