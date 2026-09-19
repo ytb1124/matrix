@@ -2,7 +2,6 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { formatWon, type Venue } from "@/lib/venues";
 
@@ -70,7 +69,7 @@ export function NaverVenueMap({ venues, clientId }: { venues: Venue[]; clientId:
       {ready && mapped.length === 0 && <div className="matrix-map-empty"><MapPin /><strong>표시할 검증 좌표가 없습니다</strong><span>주소 geocoding 검토가 끝난 공연장만 지도에 표시됩니다.</span></div>}
       {selected && <div className="map-preview">
         {selected.images?.[0] ? <img src={selected.images[0]} alt="" /> : <div className="map-preview-placeholder">MATRIX</div>}
-        <div><button className="map-preview-close" onClick={() => setSelected(null)} aria-label="미리보기 닫기">×</button><p className="map-preview-area">{selected.area}</p><h3>{selected.name}</h3>{selected.capacity && <p>{selected.capacity.toLocaleString("ko-KR")}명</p>}<p className="map-preview-price">{selectedPrice === null ? "가격 문의" : `${formatWon(selectedPrice)}부터`}</p><Link href={`/venues/${selected.slug}`}>상세보기</Link></div>
+        <div><button className="map-preview-close" onClick={() => setSelected(null)} aria-label="미리보기 닫기">×</button><p className="map-preview-area">{selected.area}</p><h3>{selected.name}</h3>{selected.capacity && <p>{selected.capacity.toLocaleString("ko-KR")}명</p>}<p className="map-preview-price">{selectedPrice === null ? "가격 문의" : `${formatWon(selectedPrice)}부터`}</p><a href={`/venues/${selected.slug}`}>상세보기</a></div>
       </div>}
     </div>
   );

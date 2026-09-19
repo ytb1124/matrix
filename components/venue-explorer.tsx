@@ -1,8 +1,7 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element, @next/next/no-html-link-for-pages */
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { Check, ChevronDown, GitCompareArrows, List, Map, Search, Settings, SlidersHorizontal, X } from "lucide-react";
 import { formatWon, type Venue } from "@/lib/venues";
 import { VenueCover } from "@/components/venue-cover";
@@ -23,13 +22,13 @@ function VenueCard({ venue, dayBasis, selected, onSelect }: { venue: Venue; dayB
   const price = dayBasis === "weekday" ? venue.prices.weekdayMin : venue.prices.weekendMin;
   const equipment = [venue.audio.console, venue.backline.drums ? "Drum" : null, venue.backline.guitarAmp ? "Guitar Amp" : null].filter(Boolean).slice(0, 3);
   return <article className={`venue-card ${selected ? "venue-card-selected" : ""}`}>
-    <Link href={`/venues/${venue.slug}`} className="venue-card-media" aria-label={`${venue.name} 상세보기`}><VenueImage venue={venue} /></Link>
+    <a href={`/venues/${venue.slug}`} className="venue-card-media" aria-label={`${venue.name} 상세보기`}><VenueImage venue={venue} /></a>
     <div className="venue-card-body">
-      <div className="venue-card-title-row"><div><p className="venue-area">{venue.area}</p><Link href={`/venues/${venue.slug}`} className="venue-name">{venue.name}</Link></div><button onClick={onSelect} className={`compare-check ${selected ? "compare-check-active" : ""}`} aria-label={selected ? "비교에서 제외" : "비교에 추가"}>{selected ? <Check /> : <GitCompareArrows />}</button></div>
+      <div className="venue-card-title-row"><div><p className="venue-area">{venue.area}</p><a href={`/venues/${venue.slug}`} className="venue-name">{venue.name}</a></div><button onClick={onSelect} className={`compare-check ${selected ? "compare-check-active" : ""}`} aria-label={selected ? "비교에서 제외" : "비교에 추가"}>{selected ? <Check /> : <GitCompareArrows />}</button></div>
       <p className="venue-station">{venue.nearestStation.split("/")[0]}</p>
       <div className="venue-core"><span>{venue.capacity ? `${venue.capacity.toLocaleString("ko-KR")}명` : "수용 인원 확인 필요"}</span><strong>{price === null ? `${dayBasis === "weekday" ? "평일" : "주말"} 가격 문의` : `${dayBasis === "weekday" ? "평일" : "주말"} ${formatWon(price)}부터`}</strong></div>
       <div className="venue-tags">{venue.staff.soundEngineer === true && <span>FOH Engineer 포함</span>}{equipment.map((item) => <span key={item}>{item}</span>)}</div>
-      <Link href={`/venues/${venue.slug}`} className="venue-detail-link">상세보기</Link>
+      <a href={`/venues/${venue.slug}`} className="venue-detail-link">상세보기</a>
     </div>
   </article>;
 }
@@ -82,10 +81,10 @@ export function VenueExplorer({ initialVenues, naverMapClientId }: { initialVenu
   const filters = <><label className="filter-select">지역<select value={area} onChange={(event) => setArea(event.target.value)}>{areas.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown /></label><label className="filter-select">가격 기준<select value={dayBasis} onChange={(event) => setDayBasis(event.target.value as DayBasis)}><option value="weekday">평일</option><option value="weekend">주말</option></select><ChevronDown /></label><div className="price-filter-popover"><PriceControl value={maxPrice} onChange={setMaxPrice} /></div><button className={`filter-button ${engineer ? "selected" : ""}`} onClick={() => setEngineer(!engineer)}>엔지니어</button><button className={`filter-button ${drums ? "selected" : ""}`} onClick={() => setDrums(!drums)}>Drum</button><button className={`filter-button ${consoleOnly ? "selected" : ""}`} onClick={() => setConsoleOnly(!consoleOnly)}>Console</button>{activeCount > 0 && <button className="filter-reset" onClick={reset}>전체 초기화</button>}</>;
 
   return <div className="matrix-page">
-    <header className="matrix-header"><div className="matrix-header-inner"><Link href="/" className="matrix-logo"><span>M</span>MATRIX</Link><label className="matrix-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="공연장명, 지역, 역 또는 주소 검색" /></label><Link href="/admin" className="admin-link"><Settings />관리자</Link></div></header>
+    <header className="matrix-header"><div className="matrix-header-inner"><a href="/" className="matrix-logo"><span>M</span>MATRIX</a><label className="matrix-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="공연장명, 지역, 역 또는 주소 검색" /></label><a href="/admin" className="admin-link"><Settings />관리자</a></div></header>
     <div className="matrix-filter-bar"><div className="matrix-filter-inner"><button className="mobile-filter-button" onClick={() => setMobileFilters(true)}><SlidersHorizontal />필터{activeCount > 0 && <b>{activeCount}</b>}</button><div className="desktop-filters">{filters}</div><div className="view-switch"><button className={view === "list" ? "active" : ""} onClick={() => setView("list")}><List />목록</button><button className={view === "map" ? "active" : ""} onClick={() => setView("map")}><Map />지도</button></div></div></div>
     <main className="matrix-main"><div className="result-head"><div><p>홍대 · 합정 · 상수 · 망원</p><h1>공연장 {filtered.length}곳</h1></div><label className="sort-control">정렬<select value={sort} onChange={(event) => setSort(event.target.value as SortKey)}><option value="default">기본순</option><option value="price">가격 낮은순</option><option value="capacity">수용 인원 많은순</option><option value="updated">최근 업데이트순</option></select><ChevronDown /></label></div>
-      {filtered.length === 0 ? <div className="matrix-empty"><Search /><h2>조건에 맞는 공연장이 없습니다</h2><p>필터를 줄이거나 검색어를 바꿔보세요.</p><button onClick={reset}>필터 초기화</button></div> : view === "list" ? <div className="venue-grid">{filtered.map((venue) => <VenueCard key={venue.slug} venue={venue} dayBasis={dayBasis} selected={selectedSlugs.includes(venue.slug)} onSelect={() => toggleSelected(venue.slug)} />)}</div> : <div className="map-split"><div className="map-list">{filtered.map((venue) => { const price = dayBasis === "weekday" ? venue.prices.weekdayMin : venue.prices.weekendMin; return <div className="map-list-item" key={venue.slug}><Link href={`/venues/${venue.slug}`}><VenueImage venue={venue} compact /></Link><div><p>{venue.area}</p><Link href={`/venues/${venue.slug}`}>{venue.name}</Link><span>{price === null ? "가격 문의" : `${formatWon(price)}부터`}</span></div></div>; })}</div><NaverVenueMap venues={filtered} clientId={naverMapClientId} /></div>}
+      {filtered.length === 0 ? <div className="matrix-empty"><Search /><h2>조건에 맞는 공연장이 없습니다</h2><p>필터를 줄이거나 검색어를 바꿔보세요.</p><button onClick={reset}>필터 초기화</button></div> : view === "list" ? <div className="venue-grid">{filtered.map((venue) => <VenueCard key={venue.slug} venue={venue} dayBasis={dayBasis} selected={selectedSlugs.includes(venue.slug)} onSelect={() => toggleSelected(venue.slug)} />)}</div> : <div className="map-split"><div className="map-list">{filtered.map((venue) => { const price = dayBasis === "weekday" ? venue.prices.weekdayMin : venue.prices.weekendMin; return <div className="map-list-item" key={venue.slug}><a href={`/venues/${venue.slug}`}><VenueImage venue={venue} compact /></a><div><p>{venue.area}</p><a href={`/venues/${venue.slug}`}>{venue.name}</a><span>{price === null ? "가격 문의" : `${formatWon(price)}부터`}</span></div></div>; })}</div><NaverVenueMap venues={filtered} clientId={naverMapClientId} /></div>}
     </main>
     <footer className="matrix-footer"><strong>MATRIX</strong><span>공연장 대관 및 기술 정보 검색</span></footer>
     {selected.length > 0 && <div className="compare-bar"><div><strong>{selected.length}곳 선택</strong><span>2~4곳을 선택해 비교하세요</span></div><div><button onClick={() => setSelectedSlugs([])}>초기화</button><button disabled={selected.length < 2} onClick={() => setCompareOpen(true)}>비교하기</button></div></div>}

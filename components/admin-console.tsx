@@ -1,8 +1,7 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element, @next/next/no-html-link-for-pages */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { ArrowLeft, ImagePlus, LogOut, Plus, Save, Trash2, Upload, X } from "lucide-react";
 
@@ -40,9 +39,9 @@ export function AdminConsole({ config }: { config: Config }) {
     setEquipment((gear.data ?? []) as EquipmentRow[]); setImages((photos.data ?? []) as ImageRow[]);
   })(); }, [selectedId, venues, supabase]);
 
-  if (!config.url || !config.anonKey) return <AdminFrame><div className="admin-setup"><h1>Supabase 연결이 필요합니다</h1><p>관리자 로그인과 실시간 데이터 수정은 Supabase 환경 변수를 설정한 뒤 사용할 수 있습니다.</p><code>SUPABASE_URL<br/>SUPABASE_ANON_KEY</code><Link href="/">목록으로 돌아가기</Link></div></AdminFrame>;
+  if (!config.url || !config.anonKey) return <AdminFrame><div className="admin-setup"><h1>Supabase 연결이 필요합니다</h1><p>관리자 로그인과 실시간 데이터 수정은 Supabase 환경 변수를 설정한 뒤 사용할 수 있습니다.</p><code>SUPABASE_URL<br/>SUPABASE_ANON_KEY</code><a href="/">목록으로 돌아가기</a></div></AdminFrame>;
   if (auth === "loading" || auth === "checking") return <AdminFrame><div className="admin-setup"><p>관리자 권한을 확인하고 있습니다.</p></div></AdminFrame>;
-  if (auth === "signed_out") return <AdminFrame><form className="admin-login" onSubmit={async (event) => { event.preventDefault(); setMessage(""); const { error } = await supabase?.auth.signInWithPassword({ email, password }) ?? { error: new Error("연결 오류") }; if (error) setMessage(error.message); }}><p>MATRIX ADMIN</p><h1>관리자 로그인</h1><label>이메일<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label><label>비밀번호<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>{message && <span>{message}</span>}<button type="submit">로그인</button><Link href="/">목록으로 돌아가기</Link></form></AdminFrame>;
+  if (auth === "signed_out") return <AdminFrame><form className="admin-login" onSubmit={async (event) => { event.preventDefault(); setMessage(""); const { error } = await supabase?.auth.signInWithPassword({ email, password }) ?? { error: new Error("연결 오류") }; if (error) setMessage(error.message); }}><p>MATRIX ADMIN</p><h1>관리자 로그인</h1><label>이메일<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label><label>비밀번호<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>{message && <span>{message}</span>}<button type="submit">로그인</button><a href="/">목록으로 돌아가기</a></form></AdminFrame>;
   if (auth === "denied") return <AdminFrame><div className="admin-setup"><h1>접근 권한이 없습니다</h1><p>현재 계정은 MATRIX 관리자로 등록되지 않았습니다.</p><button onClick={() => void supabase?.auth.signOut()}>로그아웃</button></div></AdminFrame>;
 
   const save = async () => { if (!supabase || !selectedId) return; setSaving(true); setMessage(""); const base = { name: form.name, slug: form.slug, venue_type: form.venue_type || null, district: form.district || null, neighborhood: form.neighborhood || null, area_label: form.area_label || "기타", address_display: form.address_display, nearest_station: form.nearest_station || null, phone: form.phone || null, official_url: form.official_url || null, capacity_people: form.capacity_people ? Number(form.capacity_people) : null, stage_size: form.stage_size || null, last_checked_at: form.last_checked_at || null, verification_status: form.verification_status || "unverified", location_verified: Boolean(form.location_verified) };
@@ -65,7 +64,7 @@ export function AdminConsole({ config }: { config: Config }) {
     <AdminSection title="대표 이미지"><label className="image-upload"><Upload /><span>여러 이미지 업로드</span><input type="file" accept="image/*" multiple onChange={(event) => void uploadImages(event.target.files)} /></label><div className="admin-images">{images.map((image) => <div key={image.id}><img src={image.public_url} alt="" /><button onClick={async () => { await supabase!.storage.from("venue-images").remove([image.storage_path]); await supabase!.from("venue_images").delete().eq("id", image.id); setImages(images.filter((item) => item.id !== image.id)); }}><Trash2 /></button></div>)}{images.length === 0 && <div className="admin-no-image"><ImagePlus />등록된 이미지 없음</div>}</div></AdminSection></main></div></AdminFrame>;
 }
 
-function AdminFrame({ children }: { children: React.ReactNode }) { return <div className="admin-page"><div className="admin-top"><Link href="/"><ArrowLeft />MATRIX로 돌아가기</Link></div>{children}</div>; }
+function AdminFrame({ children }: { children: React.ReactNode }) { return <div className="admin-page"><div className="admin-top"><a href="/"><ArrowLeft />MATRIX로 돌아가기</a></div>{children}</div>; }
 function AdminSection({ title, children }: { title: string; children: React.ReactNode }) { return <section className="admin-section"><h2>{title}</h2><div className="admin-form-grid">{children}</div></section>; }
 function TextField({ label, value, onChange, type = "text" }: { label: string; value: string | null | undefined; onChange: (value: string) => void; type?: string }) { return <label className="admin-field"><span>{label}</span><input type={type} value={value ?? ""} onChange={(event) => onChange(event.target.value)} /></label>; }
 function BoolField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label className="admin-field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">확인 필요</option><option value="true">포함 / 가능</option><option value="false">미포함 / 불가</option></select></label>; }

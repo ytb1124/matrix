@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
-import Link from "next/link";
+/* eslint-disable @next/next/no-html-link-for-pages */
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, MapPin } from "lucide-react";
 import { formatWon } from "@/lib/venues";
@@ -41,7 +41,7 @@ export default async function VenueDetail({ params }: Props) {
     { label: "접근성", value: included(venue.facilities.accessibility) }, { label: "무대 크기", value: venue.stageSize },
   ];
   return <div className="matrix-detail-page">
-    <header className="detail-topbar"><div><Link href="/" className="detail-back"><ArrowLeft />목록으로</Link><Link href="/" className="matrix-logo"><span>M</span>MATRIX</Link></div></header>
+    <header className="detail-topbar"><div><a href="/" className="detail-back"><ArrowLeft />목록으로</a><a href="/" className="matrix-logo"><span>M</span>MATRIX</a></div></header>
     <main className="detail-main">
       <div className="detail-hero">
         <div className="detail-image">{mainImage ? <img src={mainImage} alt={`${venue.name} 공연장`} /> : <VenueCover name={venue.name} accent={venue.accent} />}</div>
@@ -58,4 +58,3 @@ export default async function VenueDetail({ params }: Props) {
     </main><footer className="matrix-footer"><strong>MATRIX</strong><span>공연장 대관 및 기술 정보 검색</span></footer>
   </div>;
 }
-
