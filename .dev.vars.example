@@ -1,0 +1,7 @@
+# Public runtime configuration. These values are visible to site visitors.
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=
+
+# Do not add SUPABASE_SECRET_KEY or NAVER_MAPS_GEOCODING_CLIENT_SECRET here.
+# They are used only by local maintenance scripts in .env.local.

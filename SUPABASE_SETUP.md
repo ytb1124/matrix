@@ -11,11 +11,11 @@
 - [ ] `/admin`에서 8개 위치를 주소와 대조한 뒤 `지도 위치 검증`을 `포함 / 가능`으로 저장
 - [ ] 대표 이미지 업로드 및 관리자 기능 최종 점검
 
-Supabase Secret Key는 GitHub나 Sites/Vercel 런타임에 배포하지 않고, Git에서 제외된 로컬 `.env.local`의 관리 스크립트에만 사용합니다.
+Supabase Secret Key는 GitHub나 Cloudflare Worker 런타임에 배포하지 않고, Git에서 제외된 로컬 `.env.local`의 관리 스크립트에만 사용합니다.
 
 ## 1. 프로젝트 값 확인
 
-Supabase Dashboard → **Project Settings → API**에서 Project URL과 Publishable key를 확인합니다. 브라우저에는 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`만 사용합니다. Secret key와 과거 Service Role key는 브라우저나 Vercel의 `NEXT_PUBLIC_` 변수에 넣지 않습니다.
+Supabase Dashboard → **Project Settings → API**에서 Project URL과 Publishable key를 확인합니다. 브라우저에는 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`만 사용합니다. Secret key와 과거 Service Role key는 브라우저나 Cloudflare의 `NEXT_PUBLIC_` 변수에 넣지 않습니다.
 
 ## 2. DB 구조 만들기
 

@@ -11,8 +11,8 @@
 Dynamic Map 허용 URL에 다음을 각각 등록합니다.
 
 - 로컬: `http://localhost:5173`
-- Sites: `https://hongdae-venue-tech-db.luxconsulting.chatgpt.site`
-- Vercel 배포 후: Vercel이 발급한 `https://...vercel.app`
+- Cloudflare preview: `https://matrix-venue.<계정>.workers.dev`
+- Cloudflare Custom Domain: 실제 연결한 `https://...` 도메인
 - 실제 커스텀 도메인을 사용하면 그 origin도 추가
 
 경로가 아니라 `https://도메인` 형태의 origin을 등록합니다.

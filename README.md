@@ -52,7 +52,7 @@ npx tsx scripts/geocode-venues.ts data/import/venues.json data/import/venues.geo
 
 ## 환경 변수
 
-로컬은 `.env.local`, 배포 환경은 Sites 또는 Vercel 환경 변수에 설정합니다. Secret key를 저장소에 커밋하지 않습니다.
+로컬은 `.env.local` 또는 `.dev.vars`, 배포 환경은 Cloudflare Build Variables와 Worker Runtime Variables에 설정합니다. Secret key를 저장소에 커밋하지 않습니다.
 
 ```text
 # 브라우저 공개 가능. RLS가 쓰기 권한을 보호함
@@ -69,7 +69,7 @@ NAVER_MAPS_GEOCODING_CLIENT_SECRET=
 
 `SUPABASE_SECRET_KEY`는 초기 import와 geocoding 같은 로컬 관리 작업에서만 선택적으로 사용하며 사이트 런타임과 브라우저에는 제공하지 않습니다.
 
-초보자용 전체 절차는 [SUPABASE_SETUP.md](SUPABASE_SETUP.md), [NAVER_MAP_SETUP.md](NAVER_MAP_SETUP.md), [DEPLOYMENT.md](DEPLOYMENT.md)를 따릅니다.
+초보자용 전체 절차는 [SUPABASE_SETUP.md](SUPABASE_SETUP.md), [NAVER_MAP_SETUP.md](NAVER_MAP_SETUP.md), [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md)를 따릅니다.
 
 ## Excel 이관
 
@@ -85,6 +85,16 @@ python scripts/import_venues.py /path/to/hongdae_venue_research_0919.xlsx data/i
 npm ci
 npm run dev
 ```
+
+## Cloudflare Workers 배포
+
+```bash
+npm run check:vinext
+npm run build:cloudflare
+npm run deploy:cloudflare
+```
+
+GitHub 자동 배포와 커스텀 도메인 연결은 [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md)를 확인합니다.
 
 ## 구조
 
