@@ -10,6 +10,7 @@ create table public.venues (
   name text not null unique,
   venue_type text,
   district text,
+  neighborhood text,
   area_label text,
   address_display text not null,
   address_normalized text,
@@ -21,8 +22,16 @@ create table public.venues (
   capacity_people integer check (capacity_people is null or capacity_people > 0),
   stage_width_m numeric(6,2),
   stage_depth_m numeric(6,2),
+  stage_size text,
+  rental_hours text,
+  tax_included boolean,
+  price_notes text,
   latitude numeric(10,7) check (latitude is null or latitude between -90 and 90),
   longitude numeric(10,7) check (longitude is null or longitude between -180 and 180),
+  location_verified boolean not null default false,
+  geocoded_at timestamptz,
+  geocoded_address text,
+  address_hash text,
   verification_status public.venue_verification_status not null default 'unverified',
   last_checked_at date,
   general_notes text,
@@ -124,9 +133,74 @@ create table public.verification_records (
   notes text
 );
 
+create table public.venue_images (
+  id uuid primary key default gen_random_uuid(),
+  venue_id uuid not null references public.venues(id) on delete cascade,
+  storage_path text not null unique,
+  public_url text not null,
+  alt_text text,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create table public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$ select exists (select 1 from public.admin_users where user_id = auth.uid()) $$;
+
+alter table public.venues enable row level security;
+alter table public.rental_rates enable row level security;
+alter table public.venue_staff enable row level security;
+alter table public.audio_systems enable row level security;
+alter table public.equipment_catalog enable row level security;
+alter table public.venue_equipment enable row level security;
+alter table public.venue_facilities enable row level security;
+alter table public.sources enable row level security;
+alter table public.verification_records enable row level security;
+alter table public.venue_images enable row level security;
+alter table public.admin_users enable row level security;
+
+create policy "Public read venues" on public.venues for select using (true);
+create policy "Public read rental rates" on public.rental_rates for select using (true);
+create policy "Public read venue staff" on public.venue_staff for select using (true);
+create policy "Public read audio systems" on public.audio_systems for select using (true);
+create policy "Public read equipment catalog" on public.equipment_catalog for select using (true);
+create policy "Public read venue equipment" on public.venue_equipment for select using (true);
+create policy "Public read venue facilities" on public.venue_facilities for select using (true);
+create policy "Public read sources" on public.sources for select using (true);
+create policy "Public read verification records" on public.verification_records for select using (true);
+create policy "Public read venue images" on public.venue_images for select using (true);
+create policy "Admin reads own role" on public.admin_users for select using (user_id = auth.uid());
+
+create policy "Admins manage venues" on public.venues for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage rental rates" on public.rental_rates for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage venue staff" on public.venue_staff for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage audio systems" on public.audio_systems for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage equipment catalog" on public.equipment_catalog for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage venue equipment" on public.venue_equipment for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage venue facilities" on public.venue_facilities for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage sources" on public.sources for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage verification records" on public.verification_records for all using (public.is_admin()) with check (public.is_admin());
+create policy "Admins manage venue images" on public.venue_images for all using (public.is_admin()) with check (public.is_admin());
+
+insert into storage.buckets (id, name, public) values ('venue-images', 'venue-images', true)
+on conflict (id) do update set public = excluded.public;
+create policy "Public read venue image objects" on storage.objects for select using (bucket_id = 'venue-images');
+create policy "Admins upload venue image objects" on storage.objects for insert with check (bucket_id = 'venue-images' and public.is_admin());
+create policy "Admins update venue image objects" on storage.objects for update using (bucket_id = 'venue-images' and public.is_admin()) with check (bucket_id = 'venue-images' and public.is_admin());
+create policy "Admins delete venue image objects" on storage.objects for delete using (bucket_id = 'venue-images' and public.is_admin());
+
 create index venues_search_idx on public.venues using gin (to_tsvector('simple', coalesce(name,'') || ' ' || coalesce(area_label,'') || ' ' || coalesce(address_display,'') || ' ' || coalesce(nearest_station,'')));
 create index venues_geo_idx on public.venues (latitude, longitude) where latitude is not null and longitude is not null;
 create index rental_rates_filter_idx on public.rental_rates (day_type, price_krw);
 create index venue_equipment_filter_idx on public.venue_equipment (category, venue_id);
 create index verification_latest_idx on public.verification_records (venue_id, checked_at desc);
-
+create index venue_images_order_idx on public.venue_images (venue_id, sort_order);

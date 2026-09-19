@@ -5,6 +5,7 @@ export type Venue = {
   name: string;
   type: string;
   district: string;
+  neighborhood?: string | null;
   area: string;
   address: string;
   nearestStation: string;
@@ -13,6 +14,8 @@ export type Venue = {
   sourceUrl: string;
   status: string;
   capacity: number | null;
+  images?: string[];
+  stageSize?: string | null;
   prices: {
     weekday: string | null;
     weekend: string | null;
@@ -24,6 +27,7 @@ export type Venue = {
   };
   staff: {
     soundEngineer: Ternary;
+    monitorEngineer?: Ternary;
     lightingOperator: Ternary;
     stageStaff: Ternary;
     includedNotes: string | null;
@@ -49,9 +53,20 @@ export type Venue = {
     parking: Ternary;
     waitingRoom: Ternary;
     accessibility: Ternary;
+    elevator?: Ternary;
+    easyLoadIn?: Ternary;
+  };
+  lighting?: {
+    fixtures: string | null;
+    movingLights: string | null;
+    followSpot: string | null;
+    console: string | null;
+    notes: string | null;
   };
   latitude: number | null;
   longitude: number | null;
+  locationVerified?: boolean;
+  geocodedAt?: string | null;
   lastCheckedAt: string | null;
   verificationStatus: "verified" | "needs_review" | "unverified";
   accent: string;
@@ -63,7 +78,8 @@ export const venues: Venue[] = [
     name: "홍대 플렉스라운지",
     type: "라이브클럽 및 소공연장",
     district: "마포구",
-    area: "합정·상수",
+    neighborhood: "서교동",
+    area: "합정",
     address: "서울 마포구 독막로7길 51 지하1층",
     nearestStation: "합정역 (2·6호선) / 상수역 (6호선)",
     contact: "02-322-2935",
@@ -108,7 +124,8 @@ export const venues: Venue[] = [
     name: "수상한 거리 2호점",
     type: "복합문화 소공연장",
     district: "마포구",
-    area: "합정·홍대",
+    neighborhood: "서교동",
+    area: "합정",
     address: "서울 마포구 잔다리로 28 지하1층",
     nearestStation: "합정역 (2·6호선) / 홍대입구역 (2호선)",
     contact: "010-7521-7220",
@@ -129,6 +146,7 @@ export const venues: Venue[] = [
     type: "라이브 클럽 & 루프탑 공연장",
     district: "마포구",
     area: "홍대",
+    neighborhood: "서교동",
     address: "서울 마포구 어울마당로 136-3 3층/옥상",
     nearestStation: "홍대입구역 (2·경의중앙·공항철도)",
     contact: "공식 인스타그램 @steelface_",
@@ -149,6 +167,7 @@ export const venues: Venue[] = [
     type: "라이브클럽 및 소공연장",
     district: "마포구",
     area: "상수",
+    neighborhood: "상수동",
     address: "서울 마포구 독막로 68 (상수동 321-1) 지하1층",
     nearestStation: "상수역 (6호선 1번 출구 도보 약 2분) / 합정역 (2·6호선)",
     contact: "010-9348-4620 / 010-2207-0100",
@@ -168,7 +187,8 @@ export const venues: Venue[] = [
     name: "SPACE HONG",
     type: "복합문화 소공연장",
     district: "마포구",
-    area: "서교동",
+    neighborhood: "서교동",
+    area: "홍대",
     address: "서울특별시 마포구 서교동 463-28",
     nearestStation: "홍대입구역",
     contact: "010-3909-2443",
@@ -188,7 +208,8 @@ export const venues: Venue[] = [
     name: "Roller Coaster",
     type: "라이브클럽 및 소공연장",
     district: "마포구",
-    area: "합정·서교동",
+    neighborhood: "서교동",
+    area: "합정",
     address: "서울 마포구 서교동 446-60 청람빌딩 지하",
     nearestStation: "합정역 (2·6호선 3번 출구 도보 약 6분) / 홍대입구역 (2호선)",
     contact: "@club_rollercoaster / 010-7669-4612 / 070-8281-4612",
@@ -208,7 +229,8 @@ export const venues: Venue[] = [
     name: "001라이브홀",
     type: "복합문화 소공연장",
     district: "마포구",
-    area: "망원·성산",
+    neighborhood: "성산동",
+    area: "망원",
     address: "서울특별시 마포구 성산동 260-8 B1",
     nearestStation: "망원역",
     contact: "010-3293-2245",
@@ -229,6 +251,7 @@ export const venues: Venue[] = [
     type: "라이브클럽 및 소공연장",
     district: "마포구",
     area: "상수",
+    neighborhood: "상수동",
     address: "서울특별시 마포구 와우산로15길 29 지층(지하 1층)",
     nearestStation: "상수역",
     contact: "02-6954-7777",
@@ -249,4 +272,3 @@ export const venueBySlug = (slug: string) => venues.find((venue) => venue.slug =
 
 export const formatWon = (value: number | null) =>
   value === null ? "확인 필요" : `${new Intl.NumberFormat("ko-KR").format(value)}원`;
-

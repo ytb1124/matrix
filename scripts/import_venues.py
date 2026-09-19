@@ -59,6 +59,23 @@ def slugify(name: str) -> str:
     return known.get(name, re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "needs-slug")
 
 
+def normalized_area(address: str | None) -> str:
+    """Collapse address detail into the service's single public area level."""
+    address = address or ""
+    for neighborhood, area in (
+        ("연남동", "연남"), ("망원동", "망원"), ("상수동", "상수"),
+        ("합정동", "합정"), ("동교동", "홍대"), ("서교동", "홍대"),
+    ):
+        if neighborhood in address:
+            return area
+    return "기타"
+
+
+def neighborhood(address: str | None) -> str | None:
+    match = re.search(r"([가-힣]+동)(?:\s|$)", address or "")
+    return match.group(1) if match else None
+
+
 def sheet_rows(workbook, name: str) -> list[dict[str, Any]]:
     ws = workbook[name]
     fields = SHEET_FIELDS[name]
@@ -95,7 +112,7 @@ def main() -> None:
         mics = keyed["마이크DI"].get(name, {})
         space = keyed["공간편의"].get(name, {})
         verification = keyed["출처검증"].get(name, {})
-        venues.append({"slug": slug, "name": name, "venue_type": base.get("venue_type"), "district": base.get("district"), "address_display": base.get("address"), "address_normalized": None, "nearest_station": base.get("nearest_station"), "official_url": base.get("official_url"), "active_status": base.get("active_status"), "capacity_people": space.get("capacity_people"), "latitude": None, "longitude": None, "last_checked_at": verification.get("checked_date") or base.get("last_checked_date"), "verification_status": verification.get("verification_status") or "unverified"})
+        venues.append({"slug": slug, "name": name, "venue_type": base.get("venue_type"), "district": base.get("district"), "neighborhood": neighborhood(base.get("address")), "area_label": normalized_area(base.get("address")), "address_display": base.get("address"), "address_normalized": None, "nearest_station": base.get("nearest_station"), "phone": base.get("contact"), "official_url": base.get("official_url"), "active_status": base.get("active_status"), "capacity_people": space.get("capacity_people"), "stage_size": space.get("stage_size"), "rental_hours": price.get("rental_hours"), "tax_included": ternary(price.get("tax_included")), "price_notes": price.get("price_notes"), "latitude": None, "longitude": None, "location_verified": False, "geocoded_at": None, "geocoded_address": None, "address_hash": None, "last_checked_at": verification.get("checked_date") or base.get("last_checked_date"), "verification_status": verification.get("verification_status") or "unverified"})
         staff.append({"venue_slug": slug, "sound_engineer_included": ternary(crew.get("sound_engineer")), "lighting_operator_included": ternary(crew.get("lighting_operator")), "stage_staff_included": ternary(crew.get("stage_staff")), "included_notes": crew.get("included_notes"), "raw_extra_fee": crew.get("crew_fee_krw"), "notes": crew.get("crew_notes")})
         audio.append({"venue_slug": slug, "foh_console": sound.get("console"), "main_pa": sound.get("main_pa"), "monitor_system": sound.get("monitor"), "wired_mics": mics.get("wired_mic"), "wireless_mics": mics.get("wireless_mic"), "di_boxes": mics.get("di_box")})
         facilities.append({"venue_slug": slug, "waiting_room": ternary(space.get("waiting_room")), "parking": ternary(space.get("parking")), "accessible": ternary(space.get("accessibility")), "restroom": ternary(space.get("restroom")), "hvac": ternary(space.get("hvac")), "wifi": ternary(space.get("wifi")), "notes": space.get("space_notes")})
@@ -113,4 +130,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
