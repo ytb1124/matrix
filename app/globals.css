@@ -23,3 +23,5 @@
 
 @media(max-width:767px){.matrix-welcome{padding:22px!important}.matrix-welcome [data-slot=dialog-title]{font-size:22px}.matrix-welcome [data-slot=dialog-footer]{display:grid;grid-template-columns:1fr}.matrix-welcome button{width:100%}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+.filter-select select:disabled{cursor:not-allowed;color:#999}.compare-dialog table{table-layout:fixed}.compare-dialog th,.compare-dialog td{overflow-wrap:anywhere}.compare-dialog thead th:first-child,.compare-dialog tbody th{width:140px}
