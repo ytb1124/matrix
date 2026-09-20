@@ -19,7 +19,7 @@ function mapRow(row: Row): Venue {
   const staff = (first(row.venue_staff as Row[] | Row) ?? {}) as Row;
   const audio = (first(row.audio_systems as Row[] | Row) ?? {}) as Row;
   const facilities = (first(row.venue_facilities as Row[] | Row) ?? {}) as Row;
-  const images = Array.isArray(row.venue_images) ? (row.venue_images as Row[]).sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0)) : [];
+  const images = Array.isArray(row.venue_images) ? (row.venue_images as Row[]).sort((a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0) || String(a.created_at ?? "").localeCompare(String(b.created_at ?? ""))) : [];
   const rates = Array.isArray(row.rental_rates) ? row.rental_rates as Row[] : [];
   const equipment = Array.isArray(row.venue_equipment) ? row.venue_equipment as Row[] : [];
   const weekdayRates = rates.filter((rate) => ["weekday", "friday", "hourly"].includes(String(rate.day_type)));

@@ -18,7 +18,8 @@ const priceFor = (venue: Venue, day: DayBasis) => day === "weekday" ? venue.pric
 
 function VenueImage({ venue, compact = false }: { venue: Venue; compact?: boolean }) {
   const image = venue.images?.[0];
-  return image ? <img src={image} alt={`${venue.name} 공연장`} className={compact ? "venue-image venue-image-compact" : "venue-image"} /> : <VenueCover name={venue.name} accent={venue.accent} compact={compact} />;
+  const [failed, setFailed] = useState(false);
+  return image && !failed ? <img src={image} alt={`${venue.name} 공연장`} className={compact ? "venue-image venue-image-compact" : "venue-image"} onError={() => setFailed(true)} /> : <VenueCover name={venue.name} accent={venue.accent} compact={compact} />;
 }
 
 function VenueCard({ venue, dayBasis, selected, onSelect }: { venue: Venue; dayBasis: DayBasis; selected: boolean; onSelect: () => void }) {

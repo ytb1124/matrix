@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 import { formatWon, type Venue } from "@/lib/venues";
+import { VenueCover } from "@/components/venue-cover";
 
 type NaverMap = { setCenter: (position: unknown) => void };
 type NaverMaps = {
@@ -24,6 +25,7 @@ export function NaverVenueMap({ venues, clientId }: { venues: Venue[]; clientId:
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [selected, setSelected] = useState<Venue | null>(null);
+  const [previewImageFailed, setPreviewImageFailed] = useState(false);
   const selectedPrice = selected ? selected.prices.weekendMin ?? selected.prices.weekdayMin : null;
   const mapped = useMemo(() => venues.filter((venue) => venue.locationVerified && venue.latitude !== null && venue.longitude !== null), [venues]);
   const visibleSelected = selected && mapped.some((venue) => venue.slug === selected.slug) ? selected : null;
@@ -55,7 +57,7 @@ export function NaverVenueMap({ venues, clientId }: { venues: Venue[]; clientId:
     markers.current.forEach((marker) => marker.setMap(null));
     markers.current = mapped.map((venue) => {
       const marker = new maps.Marker({ position: new maps.LatLng(venue.latitude as number, venue.longitude as number), map, title: venue.name });
-      maps.Event.addListener(marker, "click", () => setSelected(venue));
+      maps.Event.addListener(marker, "click", () => { setPreviewImageFailed(false); setSelected(venue); });
       return marker;
     });
     return () => { markers.current.forEach((marker) => marker.setMap(null)); markers.current = []; };
@@ -69,7 +71,7 @@ export function NaverVenueMap({ venues, clientId }: { venues: Venue[]; clientId:
       <div ref={mapElement} className="matrix-map" aria-label="공연장 네이버 지도" />
       {ready && mapped.length === 0 && <div className="matrix-map-empty"><MapPin /><strong>표시할 검증 좌표가 없습니다</strong><span>주소 geocoding 검토가 끝난 공연장만 지도에 표시됩니다.</span></div>}
       {visibleSelected && <div className="map-preview">
-        {visibleSelected.images?.[0] ? <img src={visibleSelected.images[0]} alt="" /> : <div className="map-preview-placeholder">MATRIX</div>}
+        {visibleSelected.images?.[0] && !previewImageFailed ? <img src={visibleSelected.images[0]} alt={`${visibleSelected.name} 공연장`} onError={() => setPreviewImageFailed(true)} /> : <VenueCover name={visibleSelected.name} accent={visibleSelected.accent} compact />}
         <div><button className="map-preview-close" onClick={() => setSelected(null)} aria-label="미리보기 닫기">×</button><p className="map-preview-area">{visibleSelected.area}</p><h3>{visibleSelected.name}</h3>{visibleSelected.capacity && <p>{visibleSelected.capacity.toLocaleString("ko-KR")}명</p>}<p className="map-preview-price">{selectedPrice === null ? "가격 문의" : `${formatWon(selectedPrice)}부터`}</p><a href={`/venues/${visibleSelected.slug}`}>상세보기</a></div>
       </div>}
     </div>
